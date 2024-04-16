@@ -152,8 +152,8 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
                 print(login_status.text)
                 print("Слетел аккаунт")
                 send_mail_message("Слетел аккаунт")
-                login_status.click()
-                time.sleep(30)
+                driver.close()
+                driver_buff.close()
 
             except:
                 pass
