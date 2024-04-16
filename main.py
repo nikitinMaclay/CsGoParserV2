@@ -92,8 +92,8 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
         # profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
         options.profile = profile
 
-        profile_directory_buff = r'%AppData%\Mozilla\Firefox\Profiles\duhsw7lg.CsV2'
-        profile_buff = webdriver.FirefoxProfile(os.path.expandvars(profile_directory))
+        profile_directory_buff = r'%AppData%\Mozilla\Firefox\Profiles\olge6z7c.buffcheck'
+        profile_buff = webdriver.FirefoxProfile(os.path.expandvars(profile_directory_buff))
         options_buff.profile = profile_buff
 
 
