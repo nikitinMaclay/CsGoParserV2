@@ -82,7 +82,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
         # options.set_preference("network.proxy.ssl_port", 8000)
         # options.add_argument("--headless")
 
-        profile_directory = r'%AppData%\Mozilla\Firefox\Profiles\ujm1eqof.csGLS'
+        profile_directory = r'%AppData%\Mozilla\Firefox\Profiles\duhsw7lg.CsV2'
         # profile_directory = r'%AppData%\Mozilla\Firefox\Profiles\c0bsyocz.CsGoParser'
         profile = webdriver.FirefoxProfile(os.path.expandvars(profile_directory))
         # profile.set_preference('permissions.default.image', 2)
@@ -91,7 +91,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
         # profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
         options.profile = profile
 
-        profile_directory_buff = r'%AppData%\Mozilla\Firefox\Profiles\ujm1eqof.csGLS'
+        profile_directory_buff = r'%AppData%\Mozilla\Firefox\Profiles\duhsw7lg.CsV2'
         profile_buff = webdriver.FirefoxProfile(os.path.expandvars(profile_directory))
         options_buff.profile = profile_buff
 
