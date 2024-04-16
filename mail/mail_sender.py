@@ -31,9 +31,3 @@ def send_mail_message(message_body):
     except Exception as e:
         print("Сообщение не отправлено")
         print(e)
-
-
-# send_mail_message("dasdas")
-#https://market.csgo.com/ru/Knife/%E2%98%85%20StatTrak%E2%84%A2%20Talon%20Knife%20%7C%20Ultraviolet%20%28Field-Tested%29
-#https://market.csgo.com/ru/Knife/%E2%98%85%20StatTrak%E2%84%A2%20Talon%20Knife%20%7C%20Ultraviolet%20%28Field-Tested%29
-
