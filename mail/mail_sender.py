@@ -8,7 +8,7 @@ def send_mail_message(message_body):
         sender_email = "nic1tin-maclay@yandex.ru"
         sender_password = "vjytwojntpkwfnze"
 
-        recipient_email = "nic1tin-maclay@yandex.ru"
+        recipient_email = "dabhiy@yandex.ru"
         subject = "-----"
 
         body = message_body

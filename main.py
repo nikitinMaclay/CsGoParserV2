@@ -65,7 +65,8 @@ conditions = {
 }
 
 
-def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
+def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
+                               "sort_by=hot&type_id=46%2C48%2C49%2C47%2C50%2C51&price_from=6"):
     try:
 
         # Создание опций и их настройка (для selenium)
@@ -115,7 +116,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
             driver.get(link)
         except:
             print("Страница не загрузилась за 10 минут")
-            send_mail_message("Страница не загрузилась за 10 минут")
+            send_mail_message("Страница не загрузилась за 10 минут - Сервер со всем горячими предложениями")
             driver.get(link)
 
         time.sleep(3)
@@ -139,7 +140,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
             try:
                 proxy_detection = driver.find_element(By.CLASS_NAME, value="message")
                 print("Превышен лимит запросов. IP забанен")
-                send_mail_message("Превышен лимит запросов. IP забанен")
+                send_mail_message("Превышен лимит запросов. IP забанен - Сервер со всем горячими предложениями")
             except:
                 pass
 
@@ -151,7 +152,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
                                                                                       value="desktop-only")
                 print(login_status.text)
                 print("Слетел аккаунт")
-                send_mail_message("Слетел аккаунт")
+                send_mail_message("Слетел аккаунт - Сервер со всем горячими предложениями")
                 driver.close()
                 driver_buff.close()
 
@@ -245,7 +246,8 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?sort_by=hot"):
                                         print("HAVE BEEN BOUGHT")
                                         try:
                                             send_mail_message(f"Куплен нож {cur_item_info['skin_full_name']}\n"
-                                                              f"Ссылка на нож: {cur_item_info['link_to_buy']}")
+                                                              f"Ссылка на нож: {cur_item_info['link_to_buy']} "
+                                                              f"- Сервер со всем горячими предложениями")
                                         except Exception as e:
                                             print(f"not sent:\n", e)
                                     except TimeoutException:
