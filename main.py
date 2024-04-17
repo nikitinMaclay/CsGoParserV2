@@ -263,7 +263,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
                         last_market_items = market_items_list
                         print(last_market_items)
                         n = 1
-            time.sleep(20)
+            time.sleep(60)
         driver.quit()
         driver_buff.quit()
     except Exception as e:
