@@ -253,7 +253,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
                                     except TimeoutException:
 
                                         print("SOS!!! NO MONEY!")
-
+                                time.sleep(60)
                             items_info = []
                             driver.get(link)
                             time.sleep(1)
