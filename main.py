@@ -18,6 +18,19 @@ proxy_ips = ["185.202.1.178",
              "80.243.132.224"]
 
 
+unpurchasable_skins = ["Glock-18 | Block-18",
+                       "USP-S | Jawbreaker",
+                       "M4A1-S | Black Lotus",
+                       "AWP | Duality",
+                       "AWP | Chrome Cannon",
+                       "AK-47 | Inheritance",
+                       "MP7 | Just Smile",
+                       "XM1014 | Black Tie",
+                       "AK-47 | Steel Delta",
+                       "P90 | ScaraB Rush",
+                       "M4A4 | Etch Lord"]
+
+
 # def fast_proxy_change(driver, proxy_idx):
 #     driver.get("about:config")
 #     # time.sleep(2)
@@ -152,7 +165,7 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
                                                                                       value="desktop-only")
                 print(login_status.text)
                 print("Слетел аккаунт")
-                send_mail_message("Слетел аккаунт - Сервер со всем горячими предложениями")
+                send_mail_message("Слетел аккаунт - Сервер со всеми горячими предложениями")
                 driver.close()
                 driver_buff.close()
 
@@ -183,6 +196,8 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
                                 cur_item_info = {}
                                 cur_item_info["skin_full_name"] = current_item.find_elements(by=By.TAG_NAME,
                                                                                              value='img')[-1].get_attribute("alt")
+                                if cur_item_info["skin_full_name"].strip() in unpurchasable_skins:
+                                    continue
                                 cur_item_info["link_to_buy"] = current_item.find_element(by=
                                                                                          By.TAG_NAME,
                                                                                          value="a").get_attribute("href")
