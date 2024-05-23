@@ -18,17 +18,19 @@ proxy_ips = ["185.202.1.178",
              "80.243.132.224"]
 
 
-unpurchasable_skins = ["Glock-18 | Block-18",
-                       "USP-S | Jawbreaker",
-                       "M4A1-S | Black Lotus",
-                       "AWP | Duality",
-                       "AWP | Chrome Cannon",
-                       "AK-47 | Inheritance",
-                       "MP7 | Just Smile",
-                       "XM1014 | Black Tie",
-                       "AK-47 | Steel Delta",
-                       "P90 | ScaraB Rush",
-                       "M4A4 | Etch Lord"]
+# unpurchasable_skins = ["Glock-18 | Block-18",
+#                        "USP-S | Jawbreaker",
+#                        "M4A1-S | Black Lotus",
+#                        "AWP | Duality",
+#                        "AWP | Chrome Cannon",
+#                        "AK-47 | Inheritance",
+#                        "MP7 | Just Smile",
+#                        "XM1014 | Black Tie",
+#                        "AK-47 | Steel Delta",
+#                        "P90 | ScaraB Rush",
+#                        "M4A4 | Etch Lord"]
+
+unpurchasable_skins = []
 
 
 # def fast_proxy_change(driver, proxy_idx):
@@ -218,9 +220,9 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
                                                                                                         value="input")
                             for current_item in items_info:
                                 buff_search_input.clear()
-                                time.sleep(2)
+                                time.sleep(3)
                                 buff_search_input.send_keys(current_item["skin_full_name"])
-                                time.sleep(0.5)
+                                time.sleep(2)
                                 driver_buff.find_element(By.ID, value="search_btn_csgo").click()
                                 time.sleep(8)
                                 if "StatTrak" in current_item["skin_full_name"]:
