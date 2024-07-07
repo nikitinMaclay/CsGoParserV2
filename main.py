@@ -41,7 +41,7 @@ conditions = {
 
 
 def csgo_checker(percent,
-                 link="https://lis-skins.ru/market/csgo/?sort_by=hot&type_id=46%2C48%2C49%2C47%2C50%2C51&price_from=6"):
+                 link="https://lis-skins.ru/market/csgo/?sort_by=hot&type_id=46%2C48%2C49%2C47%2C50%2C51%2C36&price_from=11"):
     try:
 
         db_con, cursor = create_database_local_connection()
