@@ -7,7 +7,7 @@ def create_database_local_connection():
         host="localhost",
         port=3306,
         user="root",
-        passwd="lapa2174",
+        passwd="lapa21",
         database="knifes_v2",
     )
 
@@ -22,7 +22,7 @@ def create_local_database():
         host="localhost",
         port=3306,
         user="root",
-        passwd="lapa2174",
+        passwd="lapa21",
     )
 
     cursor = database_connection.cursor()

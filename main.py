@@ -22,7 +22,7 @@ def create_database_local_connection():
         host="localhost",
         port=3306,
         user="root",
-        password="lapa2174",
+        password="lapa21",
         database="knifes_v2",
     )
 
