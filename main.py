@@ -1,74 +1,34 @@
 import datetime
-import os
 import random
+
+import re
 import time
 
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
-
+import mysql.connector
+import requests
+import schedule
 from mail.mail_sender import send_mail_message
-
-proxy_ips = ["185.202.1.178",
-             "185.202.1.155", "45.132.23.43",
-             "185.183.163.150",
-             "80.243.132.224"]
+from DrissionPage import ChromiumPage, ChromiumOptions
+from DrissionPage.errors import ElementNotFoundError, NoRectError
 
 
-# unpurchasable_skins = ["Glock-18 | Block-18",
-#                        "USP-S | Jawbreaker",
-#                        "M4A1-S | Black Lotus",
-#                        "AWP | Duality",
-#                        "AWP | Chrome Cannon",
-#                        "AK-47 | Inheritance",
-#                        "MP7 | Just Smile",
-#                        "XM1014 | Black Tie",
-#                        "AK-47 | Steel Delta",
-#                        "P90 | ScaraB Rush",
-#                        "M4A4 | Etch Lord"]
-
-unpurchasable_skins = []
+proxy_ips = ["160.116.219.20", "80.243.132.224", "185.202.1.178",
+             "185.202.1.155",
+             "185.183.163.150"]
 
 
-# def fast_proxy_change(driver, proxy_idx):
-#     driver.get("about:config")
-#     # time.sleep(2)
-#     # warning_btn = driver.find_element(By.ID, value="warningButton")
-#     # time.sleep(1.5)
-#     # warning_btn.click()
-#     time.sleep(2)
-#     setup_script = f'''
-#                         var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-#                             .getService(Components.interfaces.nsIPrefBranch);
-#
-#                         prefs.setIntPref("network.proxy.type", 1);
-#                         prefs.setCharPref("network.proxy.http", "{proxy_ips[proxy_idx]}");
-#                         prefs.setIntPref("network.proxy.http_port", {8000});
-#                         prefs.setCharPref("network.proxy.ssl", "{proxy_ips[proxy_idx]}");
-#                         prefs.setIntPref("network.proxy.ssl_port", {8000});
-#                         prefs.setCharPref("network.proxy.ftp", "{proxy_ips[proxy_idx]}");
-#                         prefs.setIntPref("network.proxy.ftp_port", {8000});
-#                     '''
-#
-#     driver.execute_script(setup_script)
-#     time.sleep(2)
-#
-#
-# def create_database_local_connection():
-#     database_connection = mysql.connector.connect(
-#         host="localhost",
-#         port=3306,
-#         user="root",
-#         password="Lapa2174",
-#         database="knifes",
-#     )
-#
-#     cursor = database_connection.cursor()
-#
-#     return database_connection, cursor
+def create_database_local_connection():
+    database_connection = mysql.connector.connect(
+        host="localhost",
+        port=3306,
+        user="root",
+        password="lapa2174",
+        database="knifes_v2",
+    )
+
+    cursor = database_connection.cursor()
+
+    return database_connection, cursor
 
 
 conditions = {
@@ -80,37 +40,32 @@ conditions = {
 }
 
 
-def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
-                               "sort_by=hot&type_id=46%2C48%2C49%2C47%2C50%2C51&price_from=6"):
+def csgo_checker(percent,
+                 link="https://lis-skins.ru/market/csgo/?sort_by=hot&type_id=46%2C48%2C49%2C47%2C50%2C51&price_from=6"):
     try:
 
+        db_con, cursor = create_database_local_connection()
         # Создание опций и их настройка (для selenium)
-        options = Options()
-        options_buff = Options()
+        profile_id = "409911147"
 
-        # options.set_preference("network.proxy.type", 1)
-        # options.set_preference("network.proxy.http", "91.229.112.142")
-        # options.set_preference("network.proxy.http_port", 8000)
-        # options.set_preference('network.proxy.socks', '91.229.112.142')
-        # options.set_preference('network.proxy.socks_port', 8000)
-        # options.set_preference('network.proxy.socks_remote_dns', False)
-        # options.set_preference("network.proxy.ssl", "91.229.112.142")
-        # options.set_preference("network.proxy.ssl_port", 8000)
-        # options.add_argument("--headless")
+        req_url_start = f"http://localhost:3001/v1.0/browser_profiles/{profile_id}/start?automation=1"
+        req_url_end = f"http://localhost:3001/v1.0/browser_profiles/{profile_id}/stop"
+        try:
+            requests.get(req_url_end)
+            time.sleep(5)
+        except:
+            pass
+        response = requests.get(req_url_start)
+        time.sleep(2)
 
-        profile_directory = r'%AppData%\Mozilla\Firefox\Profiles\duhsw7lg.CsV2'
-        # profile_directory = r'%AppData%\Mozilla\Firefox\Profiles\c0bsyocz.CsGoParser'
-        profile = webdriver.FirefoxProfile(os.path.expandvars(profile_directory))
-        # profile.set_preference('permissions.default.image', 2)
-        # profile.set_preference('profile.managed_default_content_settings.stylesheet', 2)
-        # profile.set_preference("profile.managed_default_content_settings.images", 2)
-        # profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
-        options.profile = profile
+        response_json = response.json()
+        print(response_json)
+        port = response_json['automation']['port']
 
-        profile_directory_buff = r'%AppData%\Mozilla\Firefox\Profiles\olge6z7c.buffcheck'
-        profile_buff = webdriver.FirefoxProfile(os.path.expandvars(profile_directory_buff))
-        options_buff.profile = profile_buff
-
+        options = ChromiumOptions()
+        options.set_load_mode('none')
+        options.no_imgs(on_off=True)
+        options.set_paths(address=f'127.0.0.1:{port}')
 
         # Список для хранения данных о ножах
         items_info = []
@@ -118,182 +73,240 @@ def csgo_checker(percent, link="https://lis-skins.ru/market/csgo/?"
         # необходимые переменные
         n = 0
         last_market_items = []
-        # now = datetime.datetime.now()
-        # comp_year, comp_month, comp_day = int(now.strftime("%Y")), int(now.strftime("%m")), int(now.strftime("%d"))
+        now = datetime.datetime.now()
+        comp_year, comp_month, comp_day = int(now.strftime("%Y")), int(now.strftime("%m")), int(now.strftime("%d"))
 
         # драйвер и настройка
 
-        driver = webdriver.Firefox(options=options)
-        driver.set_page_load_timeout(600)
-        driver.maximize_window()
-        wait = WebDriverWait(driver, 10)
-        try:
-            driver.get(link)
-        except:
-            print("Страница не загрузилась за 10 минут")
-            send_mail_message("Страница не загрузилась за 10 минут - Сервер со всем горячими предложениями")
-            driver.get(link)
+        driver = ChromiumPage(addr_or_opts=options)
 
-        time.sleep(3)
-        driver.switch_to.default_content()
+        m_options = ChromiumOptions()
+        m_options.no_imgs(on_off=True)
 
-        # proxy_idx = 0
-        # count = 0
-        # count_to_change = 200
+        market_driver = ChromiumPage(addr_or_opts=m_options)
 
-        driver_buff = webdriver.Firefox(options=options_buff)
-        driver_buff.maximize_window()
-        driver_buff.implicitly_wait(30)
-
-        wait_buff = WebDriverWait(driver, 10)
-
-        driver_buff.get("https://buff.163.com/market/csgo")
+        driver.get(link)
+        market_driver.get("https://market.csgo.com/ru")
+        time.sleep(8)
 
         while True:
-            driver.refresh()
+
+            driver.get(link)
+            time.sleep(2)
+
+            # if count >= count_to_change:
+            #     count = 0
+            #     # proxy_idx += 1
+            #     # if proxy_idx >= len(proxy_ips) - 1:
+            #     #     proxy_idx -= (len(proxy_ips) - 1)
+            #     #
+            #     # driver.get(link)
+            #     # time.sleep(2)
+            #     pass
+
+            # try:
+            #     proxy_detection = driver.find_element(By.CLASS_NAME, value="message")
+            #     print("Превышен лимит запросов. IP забанен")
+            #     send_mail_message("Превышен лимит запросов. IP забанен")
+            #     try:
+            #         # count = 0
+            #         # proxy_idx += 1
+            #         # if proxy_idx >= len(proxy_ips) - 1:
+            #         #     proxy_idx -= (len(proxy_ips) - 1)
+            #         # fast_proxy_change(driver, proxy_idx)
+            #         # driver.get(link)
+            #         # time.sleep(2)
+            #         pass
+            #     except:
+            #         pass
+            # except:
+            #     pass
+            cloudflare_frame = driver.get_frame('@src^https://challenges.cloudflare.com/cdn-cgi', timeout=0.5)
+            if cloudflare_frame:
+                cf_check_box = cloudflare_frame('.cb-i')
+                time.sleep(3)
+                cf_check_box.click()
+                print("CLOUDFLARE DETECTED")
+                time.sleep(30)
+                driver.get(link)
 
             try:
-                proxy_detection = driver.find_element(By.CLASS_NAME, value="message")
-                print("Превышен лимит запросов. IP забанен")
-                send_mail_message("Превышен лимит запросов. IP забанен - Сервер со всем горячими предложениями")
-            except:
-                pass
-
-            try:
-                driver.switch_to.default_content()
-
-                login_status = driver.find_element(By.CLASS_NAME,
-                                                   value="login-button").find_element(by=By.CLASS_NAME,
-                                                                                      value="desktop-only")
+                login_status = driver.ele("css:a.login-button", timeout=0.2).ele("css:span.desktop-only", timeout=0.2)
                 print(login_status.text)
                 print("Слетел аккаунт")
-                send_mail_message("Слетел аккаунт - Сервер со всеми горячими предложениями")
-                driver.close()
-                driver_buff.close()
+                send_mail_message("Слетел аккаунт")
+                cursor.close()
+                db_con.close()
+                driver.quit()
+                requests.get(req_url_end)
+                return
 
-            except:
+            except ElementNotFoundError:
                 pass
 
             # Проверка отсутствия скинов
             try:
                 time.sleep(0.3)
-                driver.switch_to.default_content()
 
-                no_skins_elem = driver.find_element(by=By.CLASS_NAME, value="no-skins")
+                no_skins_elem = driver.ele("css:div.no-skins", timeout=0.2)
                 print(no_skins_elem.text)
 
-            except NoSuchElementException:
-                market_items = driver.find_elements(by=By.CLASS_NAME, value="market_item")[:12]
+            except ElementNotFoundError:
+                market_items = driver.eles("css:div.market_item")[:12]
                 try:
-                    market_items_list = [i.get_attribute("data-id") for i in market_items]
+                    market_items_list = [i.attr("data-id") for i in market_items]
                 except:
-                    time.sleep(1)
-                    market_items_list = [i.get_attribute("data-id") for i in market_items]
+                    time.sleep(2)
+                    market_items_list = [i.attr("data-id") for i in market_items]
 
                 if len(market_items) != 0:
                     if n != 0:
                         if sorted(market_items_list) != sorted(last_market_items):
-                            need_items = [i for i in market_items if i.get_attribute("data-id") not in last_market_items]
+                            need_items = [i for i in market_items if i.attr("data-id") not in last_market_items]
                             for current_item in need_items:
                                 cur_item_info = {}
-                                cur_item_info["skin_full_name"] = current_item.find_elements(by=By.TAG_NAME,
-                                                                                             value='img')[-1].get_attribute("alt")
-                                if cur_item_info["skin_full_name"].strip() in unpurchasable_skins:
-                                    continue
-                                cur_item_info["link_to_buy"] = current_item.find_element(by=
-                                                                                         By.TAG_NAME,
-                                                                                         value="a").get_attribute("href")
-
-                                skin_cost = current_item.find_element(by=By.CLASS_NAME, value="price").text
+                                cur_item_info["skin_full_name"] = current_item.ele("css:div.name-inner").text
+                                cur_item_info["link_to_buy"] = current_item.ele("css:a.name").attr("href")
+                                # if "Phase" in cur_item_info["skin_full_name"]:
+                                #     phasing = " ".join(cur_item_info["skin_full_name"].split()
+                                #                        [cur_item_info["skin_full_name"].split().index("Phase"):])
+                                #     cur_item_info["skin_full_name"] = \
+                                #         " ".join(cur_item_info["skin_full_name"].split()
+                                #                  [:cur_item_info["skin_full_name"].split().index("Phase")])
+                                skin_cost = current_item.ele("css:div.price").text
                                 skin_cost = skin_cost.replace(" ", "")
-                                skin_cost = skin_cost.replace("$", "").replace("₽", "")
                                 try:
-                                    skin_cost = float(skin_cost.replace(",", "."))
+                                    skin_cost = float(skin_cost.replace(",", ".").replace("$", ""))
                                 except:
-                                    skin_cost = float(skin_cost.split(".cls")[0])
+                                    skin_cost = float(skin_cost.split(".cls")[0].replace("$", ""))
                                 cur_item_info["skin_cost"] = skin_cost
-
+                                skins_info = current_item.ele("css:div.skin-info")
+                                delimiters = r"[ \n]"
+                                skins_info = re.split(delimiters, skins_info.text)
+                                cur_item_info["skins_info"] = skins_info
+                                if "NP" in skins_info:
+                                    continue
+                                try:
+                                    current_condition = [i for i in skins_info if i in conditions.keys()][0]
+                                    cur_item_info["current_condition"] = current_condition
+                                except:
+                                    continue
+                                if "ST™" in cur_item_info["skins_info"]:
+                                    link_to_check = f"https://market.csgo.com/" \
+                                                    f"ru/{cur_item_info["skin_full_name"].split(' | ')[0]}/StatTrak%E2%84%A2 {cur_item_info['skin_full_name']} {conditions[cur_item_info['current_condition']]}"
+                                    link_to_check = link_to_check.replace(" ", "%20").replace("|", "%7C")
+                                    cur_item_info["link_to_check"] = link_to_check
+                                else:
+                                    link_to_check = f"https://market.csgo.com/" \
+                                                    f"ru/{cur_item_info["skin_full_name"].split(' | ')[0]}/{cur_item_info['skin_full_name']} {conditions[cur_item_info['current_condition']]}"
+                                    link_to_check = link_to_check.replace(" ", "%20").replace("|", "%7C")
+                                    cur_item_info["link_to_check"] = link_to_check
                                 items_info.append(cur_item_info)
                             print(items_info)
-                            buff_search_input = driver_buff.find_element(By.ID,
-                                                                         value="j_search").find_element(By.TAG_NAME,
-                                                                                                        value="input")
                             for current_item in items_info:
-                                buff_search_input.clear()
-                                time.sleep(3)
-                                buff_search_input.send_keys(current_item["skin_full_name"])
-                                time.sleep(2)
-                                driver_buff.find_element(By.ID, value="search_btn_csgo").click()
-                                time.sleep(8)
-                                if "StatTrak" in current_item["skin_full_name"]:
-                                    cost_to_check = \
-                                        driver_buff.find_element(
-                                            By.CLASS_NAME, value="card_csgo").find_element(
-                                            By.TAG_NAME, value="li").find_element(
-                                            By.TAG_NAME, value="strong").text
+                                cursor.execute(f"SELECT * FROM `knifes`"
+                                               f" WHERE link = '{current_item['link_to_check']}'")
+                                cost_to_check = cursor.fetchall()
+                                if len(cost_to_check) == 0:
+                                    comparison_tab = market_driver.new_tab()
+                                    comparison_tab.get(current_item['link_to_check'])
+                                    time.sleep(2)
+                                    comparison_tab.run_js("window.scrollTo({ top: window.scrollY + 500, behavior: 'smooth' });")
+                                    prices = comparison_tab.eles("css:div.price")[:3]
+
+                                    prices = [float(i.text.replace(",", ".").replace("$", "").replace(" ", "")) for i in
+                                              prices]
+
+                                    cost_to_check = sum(prices) / len(prices)
+                                    query = (f"INSERT INTO `knifes`(link, cost, datetime) "
+                                             f"VALUES('{current_item['link_to_check']}', '{cost_to_check}', '{datetime.datetime.now().date()}');")
+                                    cursor.execute(query)
+                                    db_con.commit()
+                                    comparison_tab.close()
                                 else:
-                                    elems = driver_buff.find_element(
-                                            By.CLASS_NAME, value="card_csgo").find_elements(
-                                            By.TAG_NAME, value="li")
-                                    for el in elems:
-                                        if "StatTrak" not in el.find_element(By.TAG_NAME, value="h3").text:
-                                            cost_to_check = el.find_element(By.TAG_NAME, value="strong").text
-                                            break
-                                        else:
-                                            cost_to_check = 0
-
-                                cost_to_check = float(cost_to_check[1:].replace(' ', ''))
-                                print(f"cost_to_check for {current_item['skin_full_name']} is", cost_to_check)
-
+                                    cost_to_check = float(cost_to_check[0][2])
+                                print(cost_to_check)
                                 if current_item["skin_cost"] <= (cost_to_check - (cost_to_check * percent / 100)):
                                     print("NEED TO BUY!")
                                     print(current_item["skin_full_name"])
                                     print("on lis skins", current_item["skin_cost"])
                                     print("on market", cost_to_check)
-                                    driver.get(current_item["link_to_buy"])
-
-                                    buy_now_btn = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "buy-now-button")))
-
-                                    buy_now_btn.click()
+                                    buying_tab = driver.new_tab()
+                                    buying_tab.get(current_item["link_to_buy"])
+                                    time.sleep(2)
+                                    cloudflare_frame_tab = buying_tab.get_frame(
+                                        '@src^https://challenges.cloudflare.com/cdn-cgi', timeout=0.5)
+                                    if cloudflare_frame_tab:
+                                        cf_tab_check_box = cloudflare_frame_tab('.cb-i')
+                                        time.sleep(random.randint(1, 3))
+                                        cf_tab_check_box.click()
+                                        time.sleep(10)
+                                    try:
+                                        buy_now_btn = buying_tab.ele("css:div.buy-now-button", timeout=5)
+                                        buy_now_btn.click()
+                                    except:
+                                        buying_tab.get(current_item["link_to_buy"])
+                                        time.sleep(3)
+                                        buy_now_btn = buying_tab.ele("css:div.buy-now-button", timeout=5)
+                                        buy_now_btn.click()
 
                                     try:
-                                        buy_now_popup_btn = wait.until(EC.element_to_be_clickable((By.CLASS_NAME,
-                                                                                                   "buy-now-popup-bottom-button")))
-                                        buy_now_popup_btn.click()
-                                        print("HAVE BEEN BOUGHT")
+
+                                        try:
+                                            buy_now_popup_btn = driver.ele("css:div.buy-now-popup-bottom-button",
+                                                                           timeout=5)
+                                            buy_now_popup_btn.click()
+                                            print("HAVE BEEN BOUGHT")
+                                        except:
+                                            time.sleep(3)
+                                            buy_now_popup_btn = driver.ele("css:div.buy-now-popup-bottom-button",
+                                                                           timeout=5)
+                                            buy_now_popup_btn.click()
+                                            print("HAVE BEEN BOUGHT")
                                         try:
                                             send_mail_message(f"Куплен нож {cur_item_info['skin_full_name']}\n"
-                                                              f"Ссылка на нож: {cur_item_info['link_to_buy']} "
-                                                              f"- Сервер со всем горячими предложениями")
+                                                              f"Ссылка на нож: {cur_item_info['link_to_buy']}")
                                         except Exception as e:
                                             print(f"not sent:\n", e)
-                                    except TimeoutException:
-
+                                    except Exception as e:
+                                        print(e)
                                         print("SOS!!! NO MONEY!")
-                                time.sleep(60)
+                                    buying_tab.close()
+                            driver.close_tabs(others=True)
+                            driver.get_tab(0)
                             items_info = []
-                            driver.get(link)
-                            time.sleep(1)
 
                             last_market_items = market_items_list
                     else:
                         last_market_items = market_items_list
                         print(last_market_items)
                         n = 1
-            time.sleep(30)
+        cursor.close()
+        db_con.close()
         driver.quit()
-        driver_buff.quit()
+        market_driver.quit()
+        requests.get(req_url_end)
+        time.sleep(5)
     except Exception as e:
         print(e)
+        cursor.close()
+        db_con.close()
 
         try:
             driver.quit()
-            driver_buff.quit()
+            market_driver.quit()
         except Exception as e:
+            pass
+
+        try:
+            requests.get(req_url_end)
+            time.sleep(5)
+        except:
             pass
 
         csgo_checker(percent)
 
 
-percent = float(input("Введите процент : "))
-csgo_checker(percent)
+if __name__ == "__main__":
+    percent_input = int(input("Введите процент: "))
+    csgo_checker(percent=percent_input)
