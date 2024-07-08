@@ -193,12 +193,12 @@ def csgo_checker(percent,
                                     continue
                                 if "ST™" in cur_item_info["skins_info"]:
                                     link_to_check = f"https://market.csgo.com/" \
-                                                    f"ru/{cur_item_info["skin_full_name"].split(' | ')[0]}/StatTrak%E2%84%A2 {cur_item_info['skin_full_name']} {conditions[cur_item_info['current_condition']]}"
+                                                    f"ru/{cur_item_info['skin_full_name'].split(' | ')[0]}/StatTrak%E2%84%A2 {cur_item_info['skin_full_name']} {conditions[cur_item_info['current_condition']]}"
                                     link_to_check = link_to_check.replace(" ", "%20").replace("|", "%7C")
                                     cur_item_info["link_to_check"] = link_to_check
                                 else:
                                     link_to_check = f"https://market.csgo.com/" \
-                                                    f"ru/{cur_item_info["skin_full_name"].split(' | ')[0]}/{cur_item_info['skin_full_name']} {conditions[cur_item_info['current_condition']]}"
+                                                    f"ru/{cur_item_info['skin_full_name'].split(' | ')[0]}/{cur_item_info['skin_full_name']} {conditions[cur_item_info['current_condition']]}"
                                     link_to_check = link_to_check.replace(" ", "%20").replace("|", "%7C")
                                     cur_item_info["link_to_check"] = link_to_check
                                 items_info.append(cur_item_info)
