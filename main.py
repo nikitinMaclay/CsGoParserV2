@@ -218,10 +218,19 @@ def csgo_checker(percent,
                                     comparison_tab.run_js("window.scrollTo({ top: window.scrollY + 500, behavior: 'smooth' });")
                                     prices = comparison_tab.eles("css:div.price")[:3]
 
-                                    prices = [float(i.text.replace(",", ".").replace("$", "").replace(" ", "")) for i in
-                                              prices]
+                                    # prices = [float(i.text.replace(",", ".").replace("$", "").replace(" ", "")) for i in
+                                    #           prices]
 
-                                    cost_to_check = sum(prices) / len(prices)
+                                    prices_ = []
+
+                                    for i in prices:
+                                        el = i.text.replace(",", ".").replace("$", "").replace(" ", "")
+                                        if '-' in el:
+                                            el = el.split('-')[0]
+                                        el = float(el)
+                                        prices_.append(el)
+
+                                    cost_to_check = sum(prices_) / len(prices_)
                                     query = (f"INSERT INTO `knifes`(link, cost, datetime) "
                                              f"VALUES('{current_item['link_to_check']}', '{cost_to_check}', '{datetime.datetime.now().date()}');")
                                     cursor.execute(query)
