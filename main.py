@@ -224,7 +224,7 @@ def csgo_checker(percent,
                                     prices_ = []
 
                                     for i in prices:
-                                        el = i.text.replace(",", ".").replace("$", "").replace(" ", "")
+                                        el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace("₽", "")
                                         if '-' in el:
                                             el = el.split('-')[0]
                                         el = float(el)
