@@ -231,8 +231,8 @@ def csgo_checker(percent,
                                         prices_.append(el)
 
                                     cost_to_check = sum(prices_) / len(prices_)
-                                    query = (f"INSERT INTO `knifes`(link, cost, datetime) "
-                                             f"VALUES('{current_item['link_to_check']}', '{cost_to_check}', '{datetime.datetime.now().date()}');")
+                                    query = (f'''INSERT INTO `knifes`(link, cost, datetime) 
+                                    VALUES("{current_item['link_to_check']}", '{cost_to_check}', '{datetime.datetime.now().date()}');''')
                                     cursor.execute(query)
                                     db_con.commit()
                                     comparison_tab.close()
