@@ -53,9 +53,13 @@ def csgo_checker(percent,
         try:
             requests.get(req_url_end)
             time.sleep(5)
-        except:
+        except Exception as e:
+            print(e)
             pass
-        response = requests.get(req_url_start)
+        try:
+            response = requests.get(req_url_start)
+        except Exception as e:
+            print(e)
         time.sleep(2)
 
         response_json = response.json()
