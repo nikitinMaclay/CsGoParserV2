@@ -262,7 +262,7 @@ def csgo_checker(percent,
                                         time.sleep(3)
                                         buy_now_btn = buying_tab.ele("css:div.buy-now-button", timeout=5)
                                         buy_now_btn.click()
-
+                                    time.sleep(2)
                                     try:
 
                                         try:
@@ -270,7 +270,8 @@ def csgo_checker(percent,
                                                                            timeout=5)
                                             buy_now_popup_btn.click()
                                             print("HAVE BEEN BOUGHT")
-                                        except:
+                                        except Exception as e:
+                                            print(e)
                                             time.sleep(3)
                                             buy_now_popup_btn = driver.ele("css:div.buy-now-popup-bottom-button",
                                                                            timeout=5)
