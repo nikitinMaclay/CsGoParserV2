@@ -325,7 +325,7 @@ def csgo_checker(percent, profile_id,
         except:
             pass
 
-        csgo_checker(percent)
+        csgo_checker(percent, profile_id)
 
 
 if __name__ == "__main__":
