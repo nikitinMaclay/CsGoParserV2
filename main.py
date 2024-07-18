@@ -213,22 +213,29 @@ def csgo_checker(percent, profile_id,
                                 if len(cost_to_check) == 0:
                                     comparison_tab = market_driver.new_tab()
                                     comparison_tab.get(current_item['link_to_check'])
-                                    time.sleep(2)
+                                    time.sleep(5)
                                     comparison_tab.run_js("window.scrollTo({ top: window.scrollY + 500, behavior: 'smooth' });")
-                                    prices = comparison_tab.eles("css:div.price")[:3]
 
-                                    # prices = [float(i.text.replace(",", ".").replace("$", "").replace(" ", "")) for i in
-                                    #           prices]
 
-                                    prices_ = []
+                                    try:
+                                        prices = comparison_tab.eles("css:div.price")[:3]
+                                        prices_ = []
+                                        for i in prices:
+                                            el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace("₽", "")
+                                            el = float(el)
+                                            prices_.append(el)
 
-                                    for i in prices:
-                                        el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace("₽", "")
-                                        if '-' in el:
-                                            el = el.split('-')[0]
-                                        el = float(el)
-                                        prices_.append(el)
-
+                                    except:
+                                        comparison_tab.refresh()
+                                        time.sleep(5)
+                                        prices = comparison_tab.eles("css:div.price")[:3]
+                                        prices_ = []
+                                        for i in prices:
+                                            el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace("₽",
+                                                                                                                    "")
+                                            el = float(el)
+                                            prices_.append(el)
+                                        
                                     cost_to_check = sum(prices_) / len(prices_)
                                     query = (f'''INSERT INTO `knifes`(link, cost, datetime) 
                                     VALUES('{current_item['link_to_check'].replace("'", "''")}', '{cost_to_check}', '{datetime.datetime.now().date()}');''')
