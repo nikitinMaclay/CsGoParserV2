@@ -213,8 +213,9 @@ def csgo_checker(percent, profile_id,
                                 if len(cost_to_check) == 0:
                                     comparison_tab = market_driver.new_tab()
                                     comparison_tab.get(current_item['link_to_check'])
-                                    time.sleep(5)
+                                    time.sleep(3)
                                     comparison_tab.run_js("window.scrollTo({ top: window.scrollY + 500, behavior: 'smooth' });")
+                                    time.sleep(2)
 
 
                                     try:
@@ -227,15 +228,16 @@ def csgo_checker(percent, profile_id,
 
                                     except:
                                         comparison_tab.refresh()
-                                        time.sleep(5)
+                                        time.sleep(3)
                                         prices = comparison_tab.eles("css:div.price")[:3]
+                                        time.sleep(2)
                                         prices_ = []
                                         for i in prices:
                                             el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace("₽",
                                                                                                                     "")
                                             el = float(el)
                                             prices_.append(el)
-                                        
+
                                     cost_to_check = sum(prices_) / len(prices_)
                                     query = (f'''INSERT INTO `knifes`(link, cost, datetime) 
                                     VALUES('{current_item['link_to_check'].replace("'", "''")}', '{cost_to_check}', '{datetime.datetime.now().date()}');''')
