@@ -5,3 +5,4 @@
 *.pyc
 *.xml
 db_collecting.py
+/myenv

@@ -40,13 +40,12 @@ conditions = {
 }
 
 
-def csgo_checker(percent,
+def csgo_checker(percent, profile_id,
                  link="https://lis-skins.ru/market/csgo/?sort_by=hot&type_id=46%2C48%2C49%2C47%2C50%2C51%2C36&price_from=11"):
     try:
 
         db_con, cursor = create_database_local_connection()
         # Создание опций и их настройка (для selenium)
-        profile_id = "409911147"
 
         req_url_start = f"http://localhost:3001/v1.0/browser_profiles/{profile_id}/start?automation=1"
         req_url_end = f"http://localhost:3001/v1.0/browser_profiles/{profile_id}/stop"
@@ -322,4 +321,5 @@ def csgo_checker(percent,
 
 if __name__ == "__main__":
     percent_input = int(input("Введите процент: "))
-    csgo_checker(percent=percent_input)
+    profile_id_input = input("Введите id профиля: ")
+    csgo_checker(percent=percent_input, profile_id=profile_id_input)
