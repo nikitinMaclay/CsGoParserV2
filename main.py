@@ -207,8 +207,9 @@ def csgo_checker(percent, profile_id,
                                 items_info.append(cur_item_info)
                             print(items_info)
                             for current_item in items_info:
-                                cursor.execute(f"SELECT * FROM `knifes`"
-                                               f" WHERE link = '{current_item['link_to_check'].replace("'", "''")}'")
+                                cursor.execute(f'''SELECT * FROM `knifes` 
+                                WHERE link = '{current_item["link_to_check"].replace("'", "''")}'
+''')
                                 cost_to_check = cursor.fetchall()
                                 if len(cost_to_check) == 0:
                                     comparison_tab = market_driver.new_tab()
