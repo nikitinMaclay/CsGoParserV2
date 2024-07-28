@@ -7,6 +7,8 @@ import time
 import mysql.connector
 import requests
 import schedule
+
+from CloudflareBypasser import CloudflareBypasser
 from mail.mail_sender import send_mail_message
 from DrissionPage import ChromiumPage, ChromiumOptions
 from DrissionPage.errors import ElementNotFoundError, NoRectError
@@ -124,14 +126,8 @@ def csgo_checker(percent, profile_id,
             #         pass
             # except:
             #     pass
-            cloudflare_frame = driver.get_frame('@src^https://challenges.cloudflare.com/cdn-cgi', timeout=0.5)
-            if cloudflare_frame:
-                cf_check_box = cloudflare_frame('.cb-i')
-                time.sleep(3)
-                cf_check_box.click()
-                print("CLOUDFLARE DETECTED")
-                time.sleep(30)
-                driver.get(link)
+            cf_bypasser = CloudflareBypasser(driver)
+            cf_bypasser.bypass()
 
             try:
                 login_status = driver.ele("css:a.login-button", timeout=0.2).ele("css:span.desktop-only", timeout=0.2)
@@ -210,8 +206,8 @@ def csgo_checker(percent, profile_id,
                                 cursor.execute(f'''SELECT * FROM `knifes` 
                                 WHERE link = '{current_item["link_to_check"].replace("'", "''")}'
 ''')
-                                cost_to_check = cursor.fetchall()
-                                if len(cost_to_check) == 0:
+                                knife_to_check = cursor.fetchall()
+                                if len(knife_to_check) == 0:
                                     comparison_tab = market_driver.new_tab()
                                     comparison_tab.get(current_item['link_to_check'])
                                     time.sleep(3)
@@ -246,7 +242,50 @@ def csgo_checker(percent, profile_id,
                                     db_con.commit()
                                     comparison_tab.close()
                                 else:
-                                    cost_to_check = float(cost_to_check[0][2])
+                                    date_obj = knife_to_check[0][-1]
+                                    print(date_obj, type(date_obj))
+                                    current_date = datetime.datetime.now()
+                                    difference = current_date - date_obj
+                                    if difference > datetime.timedelta(days=7):
+                                        comparison_tab = market_driver.new_tab()
+                                        comparison_tab.get(current_item['link_to_check'])
+                                        time.sleep(3)
+                                        comparison_tab.run_js(
+                                            "window.scrollTo({ top: window.scrollY + 500, behavior: 'smooth' });")
+                                        time.sleep(2)
+
+                                        try:
+                                            prices = comparison_tab.eles("css:div.price")[:3]
+                                            prices_ = []
+                                            for i in prices:
+                                                el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace(
+                                                    "₽", "")
+                                                el = float(el)
+                                                prices_.append(el)
+
+                                        except:
+                                            comparison_tab.refresh()
+                                            time.sleep(3)
+                                            prices = comparison_tab.eles("css:div.price")[:3]
+                                            time.sleep(2)
+                                            prices_ = []
+                                            for i in prices:
+                                                el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace(
+                                                    "₽",
+                                                    "")
+                                                el = float(el)
+                                                prices_.append(el)
+
+                                        cost_to_check = sum(prices_) / len(prices_)
+                                        query = f'''UPDATE `knifes` SET cost = '{cost_to_check}',
+                                         datetime = '{datetime.datetime.now().date()}'
+                                          WHERE link = '{current_item["link_to_check"]}' '''
+                                        cursor.execute(query)
+                                        db_con.commit()
+                                        comparison_tab.close()
+                                    else:
+                                        cost_to_check = float(knife_to_check[0][2])
+
                                 print(cost_to_check)
                                 if current_item["skin_cost"] <= (cost_to_check - (cost_to_check * percent / 100)):
                                     print("NEED TO BUY!")
@@ -256,13 +295,8 @@ def csgo_checker(percent, profile_id,
                                     buying_tab = driver.new_tab()
                                     buying_tab.get(current_item["link_to_buy"])
                                     time.sleep(2)
-                                    cloudflare_frame_tab = buying_tab.get_frame(
-                                        '@src^https://challenges.cloudflare.com/cdn-cgi', timeout=0.5)
-                                    if cloudflare_frame_tab:
-                                        cf_tab_check_box = cloudflare_frame_tab('.cb-i')
-                                        time.sleep(random.randint(1, 3))
-                                        cf_tab_check_box.click()
-                                        time.sleep(10)
+                                    cf_bypasser = CloudflareBypasser(buying_tab)
+                                    cf_bypasser.bypass()
                                     try:
                                         buy_now_btn = buying_tab.ele("css:div.buy-now-button", timeout=5)
                                         buy_now_btn.click()
