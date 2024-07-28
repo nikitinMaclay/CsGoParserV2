@@ -244,7 +244,7 @@ def csgo_checker(percent, profile_id,
                                 else:
                                     date_obj = knife_to_check[0][-1]
                                     print(date_obj, type(date_obj))
-                                    current_date = datetime.datetime.now()
+                                    current_date = datetime.datetime.now().date()
                                     difference = current_date - date_obj
                                     if difference > datetime.timedelta(days=7):
                                         comparison_tab = market_driver.new_tab()
