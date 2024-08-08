@@ -220,6 +220,8 @@ def csgo_checker(percent, profile_id,
                                         prices_ = []
                                         for i in prices:
                                             el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace("₽", "")
+                                            if "%" in el:
+                                                el = el.split("-")[0]
                                             el = float(el)
                                             prices_.append(el)
 
@@ -232,6 +234,8 @@ def csgo_checker(percent, profile_id,
                                         for i in prices:
                                             el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace("₽",
                                                                                                                     "")
+                                            if "%" in el:
+                                                el = el.split("-")[0]
                                             el = float(el)
                                             prices_.append(el)
 
@@ -260,6 +264,8 @@ def csgo_checker(percent, profile_id,
                                             for i in prices:
                                                 el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace(
                                                     "₽", "")
+                                                if "%" in el:
+                                                    el = el.split("-")[0]
                                                 el = float(el)
                                                 prices_.append(el)
 
@@ -273,6 +279,8 @@ def csgo_checker(percent, profile_id,
                                                 el = i.text.replace(",", ".").replace("$", "").replace(" ", "").replace(
                                                     "₽",
                                                     "")
+                                                if "%" in el:
+                                                    el = el.split("-")[0]
                                                 el = float(el)
                                                 prices_.append(el)
 
