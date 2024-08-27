@@ -14,9 +14,7 @@ from DrissionPage import ChromiumPage, ChromiumOptions
 from DrissionPage.errors import ElementNotFoundError, NoRectError
 
 
-proxy_ips = ["160.116.219.20", "80.243.132.224", "185.202.1.178",
-             "185.202.1.155",
-             "185.183.163.150"]
+buying_url = "https://api.lis-skins.ru/v1/market/buy"
 
 
 def create_database_local_connection():
@@ -42,7 +40,7 @@ conditions = {
 }
 
 
-def csgo_checker(percent, profile_id,
+def csgo_checker(percent, profile_id, api_key, api_partner, api_token,
                  link="https://lis-skins.ru/market/csgo/?sort_by=hot&type_id=46%2C48%2C49%2C47%2C50%2C51%2C36&price_from=11"):
     try:
 
@@ -164,6 +162,7 @@ def csgo_checker(percent, profile_id,
                             need_items = [i for i in market_items if i.attr("data-id") not in last_market_items]
                             for current_item in need_items:
                                 cur_item_info = {}
+                                cur_item_info["skin_id"] = current_item.attr("data-id")
                                 cur_item_info["skin_full_name"] = current_item.ele("css:div.name-inner").text
                                 cur_item_info["link_to_buy"] = current_item.ele("css:a.name").attr("href")
                                 # if "Phase" in cur_item_info["skin_full_name"]:
@@ -300,42 +299,34 @@ def csgo_checker(percent, profile_id,
                                     print(current_item["skin_full_name"])
                                     print("on lis skins", current_item["skin_cost"])
                                     print("on market", cost_to_check)
-                                    buying_tab = driver.new_tab()
-                                    buying_tab.get(current_item["link_to_buy"])
-                                    time.sleep(2)
-                                    cf_bypasser = CloudflareBypasser(buying_tab)
-                                    cf_bypasser.bypass()
-                                    try:
-                                        buy_now_btn = buying_tab.ele("css:div.buy-now-button", timeout=5)
-                                        buy_now_btn.click()
-                                    except:
-                                        buying_tab.get(current_item["link_to_buy"])
-                                        time.sleep(3)
-                                        buy_now_btn = buying_tab.ele("css:div.buy-now-button", timeout=5)
-                                        buy_now_btn.click()
-                                    try:
 
-                                        try:
-                                            buy_now_popup_btn = buying_tab.ele("css:div.buy-now-popup-bottom-button",
-                                                                           timeout=5)
-                                            buy_now_popup_btn.click()
+                                    payload = {
+                                        "ids": [current_item["skin_id"]],
+                                        "partner": api_partner,
+                                        "token": api_token,
+                                    }
+
+                                    api_headers = {
+                                        "Content-Type": "application/json",
+                                        "Accept": "application/json",
+                                        "Authorization": f"Bearer {api_key}"
+                                    }
+
+                                    try:
+                                        api_response = requests.post(buying_url, json=payload, headers=api_headers)
+                                    except:
+                                        time.sleep(1)
+                                        api_response = requests.post(buying_url, json=payload, headers=api_headers)
+
+                                    try:
+                                        api_response_json = api_response.json()
+                                        if "error" in api_response_json.keys():
+                                            print("SOS!!! NO MONEY!")
+                                        else:
                                             print("HAVE BEEN BOUGHT")
-                                        except Exception as e:
-                                            print(e)
-                                            time.sleep(3)
-                                            buy_now_popup_btn = buying_tab.ele("css:div.buy-now-popup-bottom-button",
-                                                                           timeout=5)
-                                            buy_now_popup_btn.click()
-                                            print("HAVE BEEN BOUGHT")
-                                        try:
-                                            send_mail_message(f"Куплен нож {cur_item_info['skin_full_name']}\n"
-                                                              f"Ссылка на нож: {cur_item_info['link_to_buy']}")
-                                        except Exception as e:
-                                            print(f"not sent:\n", e)
-                                    except Exception as e:
-                                        print(e)
-                                        print("SOS!!! NO MONEY!")
-                                    buying_tab.close()
+                                    except:
+                                        print("INVALID RESPONSE")
+
                             driver.close_tabs(others=True)
                             driver.get_tab(0)
                             items_info = []
@@ -373,5 +364,9 @@ def csgo_checker(percent, profile_id,
 
 if __name__ == "__main__":
     percent_input = int(input("Введите процент: "))
-    profile_id_input = input("Введите id профиля: ")
-    csgo_checker(percent=percent_input, profile_id=profile_id_input)
+    profile_id_input = input("Введите id профиля: ").strip()
+    api_key_input = input("Введите Api Key профиля: ").strip()
+    api_partner_input = input("Введите partner профиля (из ссылки Trade URL): ").strip()
+    api_token_input = input("Введите token профиля (из ссылки Trade URL): ").strip()
+    csgo_checker(percent=percent_input, profile_id=profile_id_input, api_key=api_key_input,
+                 api_partner=api_partner_input, api_token=api_token_input)
